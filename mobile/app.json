@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "H4H Vision",
+    "slug": "h4h-vision",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.h4h2026.vision",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Camera access is required to display the ESP32 video stream and process frames for navigation assistance.",
+        "NSMicrophoneUsageDescription": "Microphone access is required for voice command input.",
+        "NSLocalNetworkUsageDescription": "Local network access is required to connect to the ESP32 camera on the phone hotspot.",
+        "NSBonjourServices": ["_http._tcp"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.h4h2026.vision",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-dev-client",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Camera access is required to display the ESP32 video stream.",
+          "enableMicrophonePermission": true,
+          "microphonePermissionText": "Microphone access is required for voice commands."
+        }
+      ],
+      "expo-av"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}
