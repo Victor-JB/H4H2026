@@ -39,6 +39,7 @@
     },
     "plugins": [
       "expo-dev-client",
+      "react-native-fast-tflite",
       [
         "react-native-vision-camera",
         {
