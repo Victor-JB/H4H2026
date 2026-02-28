@@ -205,3 +205,25 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# React Native
+# Node modules (already covered above, but mobile-specific)
+mobile/node_modules/
+mobile/.gradle/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/build/
+mobile/ios/build/
+mobile/ios/Pods/
+mobile/ios/*.xcworkspace
+mobile/ios/*.xcuserdata
+mobile/.metro-health-check*
+mobile/coverage/
+*.jsbundle
+mobile/android/local.properties
+mobile/android/app/debug.keystore
+mobile/android/app/release.keystore
+mobile/android/.idea/
+mobile/android/*.iml
+mobile/android/.cxx/
+mobile/android/.kotlin/
