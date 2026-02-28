@@ -26,26 +26,35 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useConnectionWatchdog } from '../hooks/useConnectionWatchdog';
-import { startSnapshotPolling, getMjpegStreamUrl } from '../services/ESP32Service';
+import {
+  startSnapshotPolling,
+  startMjpegStream,
+} from '../services/ESP32Service';
 import { speakAlert, narrateScene } from '../services/SpeechService';
+import { preprocessFrameForTFLite } from '../services/ImagePreprocessor';
+import { runInference, DEFAULT_INPUT_SIZE } from '../services/TFLiteService';
+import { processDetectionsForNavigation } from '../services/NavigationAssistanceService';
 import { Esp32ConfigContext } from '../../App';
 
 // ---------------------------------------------------------------------------
-// TFLite inference placeholder
+// Frame → TFLite inference + navigation alerts
 // ---------------------------------------------------------------------------
-/**
- * processFrameWithTFLite
- *
- * Replace this stub with your actual TFLite / react-native-fast-tflite call.
- * The function receives a base64 JPEG data-URI and should return an array of
- * detection results: [{ label: string, confidence: number, bbox: [...] }].
- *
- * @param {string} _frameDataUri - base64 JPEG data-URI
- * @returns {Promise<Array>}
- */
-async function processFrameWithTFLite(_frameDataUri) {
-  // TODO: integrate react-native-fast-tflite or ONNX Runtime Mobile
-  return [];
+async function processFrameWithTFLite(frameInput) {
+  const preprocessed = preprocessFrameForTFLite(
+    frameInput,
+    DEFAULT_INPUT_SIZE,
+    DEFAULT_INPUT_SIZE,
+  );
+  return runInference(preprocessed, 0.5);
+}
+
+/** Convert JPEG Uint8Array to data-URI for Image display */
+function jpegBytesToDataUri(bytes) {
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return `data:image/jpeg;base64,${btoa(binary)}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,49 +68,73 @@ export default function LiveVisionScreen({ navigation }) {
   const [detections, setDetections] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const pollingRef = useRef(null);
+  const streamRef = useRef(null);
   const latestFrameRef = useRef(null);
   const inferenceActiveRef = useRef(false);
 
   // ---------------------------------------------------------------------------
-  // Start / stop snapshot polling based on ESP32 reachability
+  // Start / stop frame acquisition based on ESP32 reachability and useMjpeg
   // ---------------------------------------------------------------------------
   useEffect(() => {
+    streamRef.current?.stop?.();
+    streamRef.current = null;
+
     if (!isEsp32Reachable) {
-      pollingRef.current?.stop();
-      pollingRef.current = null;
       setCurrentFrame(null);
+      latestFrameRef.current = null;
       return;
     }
 
-    pollingRef.current = startSnapshotPolling(
+    const useMjpeg = esp32Config.useMjpeg ?? false;
+
+    if (useMjpeg) {
+      startMjpegStream(
+        esp32Config,
+        (jpegBytes) => {
+          const dataUri = jpegBytesToDataUri(jpegBytes);
+          latestFrameRef.current = { dataUri, forInference: jpegBytes };
+          setCurrentFrame(dataUri);
+        },
+        (err) => console.warn('[LiveVision] MJPEG error:', err),
+      ).then((stream) => {
+        streamRef.current = stream;
+      });
+      return () => {
+        streamRef.current?.stop?.();
+        streamRef.current = null;
+      };
+    }
+
+    streamRef.current = startSnapshotPolling(
       esp32Config,
       (frame) => {
-        latestFrameRef.current = frame;
+        latestFrameRef.current = { dataUri: frame, forInference: frame };
         setCurrentFrame(frame);
       },
       (err) => console.warn('[LiveVision] snapshot error:', err),
     );
 
     return () => {
-      pollingRef.current?.stop();
-      pollingRef.current = null;
+      streamRef.current?.stop?.();
+      streamRef.current = null;
     };
   }, [isEsp32Reachable, esp32Config]);
 
   // ---------------------------------------------------------------------------
-  // TFLite inference loop — runs on every new frame at 10 FPS max
+  // TFLite inference loop — runs on every new frame at ~10 FPS max
   // ---------------------------------------------------------------------------
   useEffect(() => {
     let animFrame;
 
-    const runInference = async () => {
-      if (!inferenceActiveRef.current && latestFrameRef.current) {
+    const runInferenceLoop = async () => {
+      const latest = latestFrameRef.current;
+      if (!inferenceActiveRef.current && latest?.forInference) {
         inferenceActiveRef.current = true;
         setIsProcessing(true);
         try {
-          const results = await processFrameWithTFLite(latestFrameRef.current);
+          const results = await processFrameWithTFLite(latest.forInference);
           setDetections(results);
+          processDetectionsForNavigation(results);
         } catch (err) {
           console.warn('[LiveVision] TFLite error:', err);
         } finally {
@@ -109,10 +142,10 @@ export default function LiveVisionScreen({ navigation }) {
           setIsProcessing(false);
         }
       }
-      animFrame = setTimeout(runInference, 100); // ~10 FPS inference cap
+      animFrame = setTimeout(runInferenceLoop, 100);
     };
 
-    runInference();
+    runInferenceLoop();
     return () => clearTimeout(animFrame);
   }, []);
 
@@ -125,7 +158,6 @@ export default function LiveVisionScreen({ navigation }) {
       return;
     }
     speakAlert('Analyzing scene…');
-    // Build a description from detections or pass the frame to a vision LLM
     const description =
       detections.length > 0
         ? detections.map((d) => `${d.label} at ${Math.round(d.confidence * 100)}% confidence`).join(', ')
@@ -178,7 +210,7 @@ export default function LiveVisionScreen({ navigation }) {
           </View>
         )}
 
-        {/* Detection overlays (placeholder — replace with SVG bboxes) */}
+        {/* Detection overlays */}
         {detections.map((det, idx) => (
           <View
             key={idx}

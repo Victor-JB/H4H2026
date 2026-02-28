@@ -29,6 +29,8 @@ export const ESP32_DEFAULTS = {
   snapshotIntervalMs: 100,
   /** Request timeout in milliseconds */
   timeoutMs: 3000,
+  /** Use MJPEG stream instead of JPEG snapshot polling */
+  useMjpeg: false,
 };
 
 // ---------------------------------------------------------------------------
