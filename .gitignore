@@ -208,6 +208,7 @@ __marimo__/
 
 # React Native
 # Node modules (already covered above, but mobile-specific)
+node_modules/
 mobile/node_modules/
 mobile/.gradle/
 mobile/android/.gradle/
@@ -227,3 +228,8 @@ mobile/android/.idea/
 mobile/android/*.iml
 mobile/android/.cxx/
 mobile/android/.kotlin/
+
+# Expo
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
