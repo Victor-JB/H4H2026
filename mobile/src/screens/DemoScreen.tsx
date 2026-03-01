@@ -159,10 +159,6 @@ export default function DemoScreen() {
               <Text style={styles.statValue}>{fps}</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Frames</Text>
-              <Text style={styles.statValue}>{frameCount}</Text>
-            </View>
-            <View style={styles.statItem}>
               <Text style={styles.statLabel}>Mode</Text>
               <Text style={styles.statValue}>{config.streamingMode}</Text>
             </View>
@@ -220,7 +216,6 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
-    paddingTop: 60,
     backgroundColor: '#111',
     borderBottomWidth: 1,
     borderBottomColor: '#333',
