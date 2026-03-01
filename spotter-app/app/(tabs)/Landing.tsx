@@ -40,15 +40,25 @@ export default function LandingScreen() {
         </Animated.View>
       </View>
 
-      <Pressable
-        style={styles.bottomBar}
-        onPress={() => router.push('/(tabs)/Vision')}
-        accessibilityRole="button"
-        accessibilityLabel="Go to Vision"
-      >
-        <View style={styles.bottomLine} />
-        <Text style={styles.chevron}>{'>'}</Text>
-      </Pressable>
+      <View style={styles.buttonContainer}>
+        <Pressable
+          style={styles.button}
+          onPress={() => router.push('/(tabs)/demo')}
+          accessibilityRole="button"
+          accessibilityLabel="Go to ESP32 Camera Demo"
+        >
+          <Text style={styles.buttonText}>ESP32 Camera Demo</Text>
+        </Pressable>
+        <Pressable
+          style={styles.bottomBar}
+          onPress={() => router.push('/(tabs)/Vision')}
+          accessibilityRole="button"
+          accessibilityLabel="Go to Vision"
+        >
+          <View style={styles.bottomLine} />
+          <Text style={styles.chevron}>{'>'}</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -82,6 +92,22 @@ const styles = StyleSheet.create({
   cap: {
     width: CAP_SIZE,
     height: CAP_SIZE,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 16,
+  },
+  button: {
+    width: '100%',
+    backgroundColor: '#1a73e8',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   bottomBar: {
     width: '100%',
