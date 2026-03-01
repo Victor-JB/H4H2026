@@ -25,15 +25,32 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="stt-test"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="audio-listener"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="listen"
+        options={{
+          title: 'Listen',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="mic.fill" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -60,18 +77,7 @@ export default function TabLayout() {
           href: null,
         }}
       />
-      <Tabs.Screen
-        name="stt-test"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="audio-listener"
-        options={{
-          href: null,
-        }}
-      />
+      
     </Tabs>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 
-const ESP_IP = '172.20.10.9'; // Your ESP32 IP
+const ESP_IP = '172.20.10.2'; // Your ESP32 IP
 const STATUS_URL = `http://${ESP_IP}:8080/status`;
 const AUDIO_URL = `http://${ESP_IP}:8080/audio.wav`;
 
@@ -20,6 +20,7 @@ export default function AudioListener() {
       if (!response.ok) return;
 
       const data = await response.json();
+      console.log("ESP32 Status:", data);
       
       // ESP32 flipped isAudioReady to true!
       if (data.ready) {
