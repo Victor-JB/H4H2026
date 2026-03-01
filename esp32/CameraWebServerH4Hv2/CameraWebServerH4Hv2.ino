@@ -300,35 +300,44 @@ void setup() {
     Serial.println("📤 Audio downloaded by app");
   });
 
-  // Upload endpoint: App posts ElevenLabs response here
+  // Upload endpoint: App posts ElevenLabs RAW WAV binary here
   audioServer.on("/play", HTTP_POST, 
-    // Function to run AFTER upload finishes
     []() { 
       audioServer.sendHeader("Access-Control-Allow-Origin", "*");
-      audioServer.send(200, "text/plain", "Audio received and queued for playback");
+      audioServer.send(200, "text/plain", "Audio received");
     },
-    // Function to handle the actual file data as it streams in
-    []() { 
-      HTTPUpload& upload = audioServer.upload();
-      
-      if (upload.status == UPLOAD_FILE_START) {
-        Serial.println("📥 Receiving audio response from iPhone...");
-        isPlaying = false;      // Stop any current playback
-        playbackDataSize = 0;   // Reset buffer
-      } 
-      else if (upload.status == UPLOAD_FILE_WRITE) {
-        // Write the incoming data directly into our PSRAM buffer
-        if (playbackDataSize + upload.currentSize < MAX_AUDIO_SIZE) {
-          memcpy(playbackBuffer + playbackDataSize, upload.buf, upload.currentSize);
-          playbackDataSize += upload.currentSize;
-        }
-      } 
-      else if (upload.status == UPLOAD_FILE_END) {
-        Serial.printf("✅ Received %u bytes. Starting playback...\n", playbackDataSize);
-        isPlaying = true; // This tells the FreeRTOS task to start playing
-      }
-    }
+    // We don't use HTTPUpload because React Native will just stream raw binary.
+    // Instead we read the data directly out of the client.
+    []() { }
   );
+
+  // We add a custom handler to grab the raw binary body data from the request
+  audioServer.on("/play", HTTP_POST, []() {
+    if (audioServer.hasArg("plain")) {
+      String body = audioServer.arg("plain");
+      // Fallback if small string body
+    }
+    
+    // Check if there is data to read
+    WiFiClient client = audioServer.client();
+    playbackDataSize = 0;
+    isPlaying = false;
+    
+    if (client.connected()) {
+      Serial.println("📥 Receiving RAW audio streaming response from iPhone...");
+      
+      while (client.available() && playbackDataSize < MAX_AUDIO_SIZE) {
+        size_t bytesRead = client.read(playbackBuffer + playbackDataSize, MAX_AUDIO_SIZE - playbackDataSize);
+        playbackDataSize += bytesRead;
+      }
+      
+      Serial.printf("✅ Received %u bytes. Starting playback...\n", playbackDataSize);
+      isPlaying = true;
+    }
+    
+    audioServer.sendHeader("Access-Control-Allow-Origin", "*");
+    audioServer.send(200, "text/plain", "Sound Playback In Progress");
+  });
 
   audioServer.begin();
   Serial.println("Camera Server running on Port 80");

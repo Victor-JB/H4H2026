@@ -1,35 +1,31 @@
-import {
-  readAsStringAsync,
-  EncodingType,
-  getInfoAsync,
-} from "expo-file-system";
-
 /**
- * POST a local .wav file to the ESP32 playback endpoint.
+ * POST a raw binary .wav file to the ESP32 playback endpoint.
  *
  * The ESP32 firmware should expose POST /play on the audio port (8080)
  * and feed the received PCM/WAV data to I2S for speaker output.
  */
+// Helper to convert strings to byte arrays
+function stringToUint8Array(str: string): Uint8Array {
+  const arr = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    arr[i] = str.charCodeAt(i) & 0xff;
+  }
+  return arr;
+}
+
 export async function sendAudioToEsp32(
-  localWavUri: string,
+  wavBinary: ArrayBuffer,
   espAudioBase: string
 ): Promise<void> {
-  // Verify the file exists
-  const info = await getInfoAsync(localWavUri);
-  if (!info.exists) {
-    throw new Error(`WAV file not found: ${localWavUri}`);
-  }
 
-  const form = new FormData();
-  form.append("file", {
-    uri: localWavUri,
-    name: "response.wav",
-    type: "audio/wav",
-  } as any);
-
+  // We are skipping multipart/form-data completely.
+  // We send the pure raw binary directly into the body.
   const res = await fetch(`${espAudioBase}/play`, {
     method: "POST",
-    body: form,
+    headers: {
+      "Content-Type": "application/octet-stream",
+    },
+    body: wavBinary,
   });
 
   if (!res.ok) {

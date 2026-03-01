@@ -16,7 +16,7 @@ export interface VoiceCommandResult {
   transcript: string;
   intent: Intent;
   response: string;
-  ttsUri?: string;
+  ttsBuffer?: ArrayBuffer;
   espPlaybackOk: boolean;
   error?: string;
 }
@@ -99,21 +99,21 @@ export async function handleVoiceCommand(audioData: Blob): Promise<VoiceCommandR
       break;
   }
 
-  // 4. Text-to-speech -> local .wav
-  let ttsUri: string | undefined;
+  // 4. Text-to-speech -> Pure ArrayBuffer in memory
+  let ttsBuffer: ArrayBuffer | undefined;
   let espPlaybackOk = false;
   let error: string | undefined;
 
   try {
-    ttsUri = await elevenLabsTTS(response);
+    ttsBuffer = await elevenLabsTTS(response);
   } catch (e: any) {
     error = `TTS failed: ${e?.message ?? e}`;
   }
 
   // 5. Send .wav to ESP32 speaker
-  if (ttsUri) {
+  if (ttsBuffer) {
     try {
-      await sendAudioToEsp32(ttsUri, ESP_AUDIO_BASE);
+      await sendAudioToEsp32(ttsBuffer, ESP_AUDIO_BASE);
       espPlaybackOk = true;
     } catch (e: any) {
       error = (error ? error + " | " : "") + `ESP play: ${e?.message ?? e}`;
@@ -124,7 +124,7 @@ export async function handleVoiceCommand(audioData: Blob): Promise<VoiceCommandR
     transcript,
     intent: parsed.intent,
     response,
-    ttsUri,
+    ttsBuffer,
     espPlaybackOk,
     error,
   };

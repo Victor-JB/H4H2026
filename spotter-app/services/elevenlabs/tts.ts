@@ -1,7 +1,9 @@
+import * as FileSystem from "expo-file-system";
 import {
   cacheDirectory,
   writeAsStringAsync,
   EncodingType,
+  documentDirectory
 } from "expo-file-system";
 
 // ── Config ──────────────────────────────────────────────────
@@ -69,7 +71,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
  * Convert text to a local .wav file using ElevenLabs TTS.
  * Returns the local file URI.
  */
-export async function elevenLabsTTS(text: string): Promise<string> {
+export async function elevenLabsTTS(text: string): Promise<ArrayBuffer> {
   const apiKey = process.env.EXPO_PUBLIC_Spot;
   if (!apiKey) throw new Error("Missing Spot key (EXPO_PUBLIC_Spot)");
 
@@ -112,14 +114,7 @@ export async function elevenLabsTTS(text: string): Promise<string> {
   wav.set(header, 0);
   wav.set(pcmData, header.length);
 
-  // Write to cache as base64
-  const baseDir = cacheDirectory;
-  if (!baseDir) throw new Error("No cache directory available");
-
-  const outPath = `${baseDir}tts_${Date.now()}.wav`;
-  await writeAsStringAsync(outPath, uint8ToBase64(wav), {
-    encoding: EncodingType.Base64,
-  });
-
-  return outPath;
+  // Instead of writing to FileSystem, we will return the pure ArrayBuffer (binary)
+  // so the caller can send it straight to the ESP32!
+  return wav.buffer;
 }
