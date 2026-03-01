@@ -54,6 +54,38 @@ unsigned long lastDebounceTime = 0;
 unsigned long debounceDelay = 50;
 
 // ==========================================
+// CHIME GENERATOR (simple sine-wave beeps)
+// ==========================================
+void playTone(uint16_t freqHz, uint16_t durationMs) {
+  const uint32_t sampleRate = 16000;
+  const uint32_t totalSamples = (sampleRate * durationMs) / 1000;
+  const float amplitude = 8000.0f; // Volume (max 32767 for 16-bit)
+
+  for (uint32_t i = 0; i < totalSamples; i++) {
+    float t = (float)i / (float)sampleRate;
+    int16_t sample = (int16_t)(amplitude * sinf(2.0f * PI * freqHz * t));
+    I2S_SPEAKER.write(sample);
+    I2S_SPEAKER.write(sample); // stereo: same on both channels
+  }
+}
+
+// Two rising tones = "start recording"
+void playStartChime() {
+  Serial.println("🔔 Start chime");
+  playTone(800,  100); // short beep
+  delay(30);
+  playTone(1200, 100); // higher beep
+}
+
+// Two falling tones = "stop recording"
+void playStopChime() {
+  Serial.println("🔔 Stop chime");
+  playTone(1200, 100); // high beep
+  delay(30);
+  playTone(600,  150); // lower, slightly longer beep
+}
+
+// ==========================================
 // WAV HEADER GENERATOR
 // ==========================================
 void sendWavHeader(WiFiClient& client, uint32_t dataSize) {
@@ -312,10 +344,8 @@ void setup() {
 // MAIN LOOP
 // ==========================================
 void loop() {
-  // Keep audio web server responsive (Camera server handles itself in the background)
   audioServer.handleClient();
 
-  // Handle Physical Button (Debounced)
   int reading = digitalRead(BUTTON_PIN);
   if (reading != lastButtonState) {
     lastDebounceTime = millis();
@@ -325,30 +355,31 @@ void loop() {
     static int buttonState = HIGH;
     if (reading != buttonState) {
       buttonState = reading;
-      
-      if (buttonState == LOW) { // Button pressed down
-        if (!isRecording && !isPlaying) { // Don't record if we are currently playing audio
-          // Start Recording
+
+      if (buttonState == LOW) { // Button pressed
+        if (!isRecording && !isPlaying) {
+          // Play start chime BEFORE recording begins
+          playStartChime();
+          delay(50); // tiny gap so chime doesn't bleed into recording
+
           isRecording = true;
           isAudioReady = false;
-          audioDataSize = 0; // Clear buffer
-          recordingStartTime = millis();
+          audioDataSize = 0;
           Serial.println("🎤 Recording Started!");
+
         } else if (isRecording) {
-          // Stop Recording Early
+          // Stop recording FIRST so chime isn't captured
           isRecording = false;
           isAudioReady = true;
-          Serial.println("🛑 Recording Stopped Manually! Ready for App to fetch.");
+          Serial.println("🛑 Recording Stopped!");
+
+          // Play stop chime AFTER recording ends
+          delay(50);
+          playStopChime();
+          Serial.println("✅ Ready for App to fetch.");
         }
       }
     }
   }
   lastButtonState = reading;
-
-  // Auto-stop recording after 15 seconds
-  if (isRecording && (millis() - recordingStartTime >= MAX_RECORD_TIME_MS)) {
-    isRecording = false;
-    isAudioReady = true;
-    Serial.println("🛑 Recording Stopped (15s Auto Limit). Ready for App to fetch.");
-  }
 }
