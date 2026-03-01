@@ -1,20 +1,22 @@
-import * as FileSystem from "expo-file-system";
+import {
+  cacheDirectory,
+  documentDirectory,
+  downloadAsync,
+} from "expo-file-system";
 
 export async function downloadEspWav(espBaseUrl: string): Promise<string> {
   const url = `${espBaseUrl}/audio.wav`;
 
-  // Some Expo/TS setups have mismatched type defs that don’t expose
-  // documentDirectory/cacheDirectory even though they exist at runtime.
-  const fsAny = FileSystem as any;
-  const baseDir: string | undefined = fsAny.documentDirectory ?? fsAny.cacheDirectory;
-
+  const baseDir = documentDirectory ?? cacheDirectory;
   if (!baseDir) {
     throw new Error(
-      "No writable directory available (documentDirectory/cacheDirectory missing). Check your expo-file-system install."
+      "No writable directory available (documentDirectory/cacheDirectory missing). " +
+        "Make sure expo-file-system is linked and you are running on a real device or Expo Go."
     );
   }
 
-  const outUri = `${baseDir}esp_audio.wav`;
-  const res = await FileSystem.downloadAsync(url, outUri);
+  // Append a cache-busting query so repeated downloads don't get a stale file
+  const outUri = `${baseDir}esp_audio_${Date.now()}.wav`;
+  const res = await downloadAsync(url, outUri);
   return res.uri;
 }

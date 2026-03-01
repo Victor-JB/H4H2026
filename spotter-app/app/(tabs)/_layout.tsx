@@ -23,7 +23,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
-      {/* <Tabs.Screen
+      <Tabs.Screen
         name="stt-test"
         options={{
           href: null,
@@ -34,7 +34,7 @@ export default function TabLayout() {
         options={{
           href: null,
         }}
-      /> */}
+      />
       <Tabs.Screen
         name="explore"
         options={{
