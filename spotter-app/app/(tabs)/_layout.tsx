@@ -54,6 +54,18 @@ export default function TabLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="stt-test"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="audio-listener"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
