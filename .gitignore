@@ -233,3 +233,7 @@ mobile/android/.kotlin/
 mobile/.expo/
 mobile/dist/
 mobile/web-build/
+
+secrets.h
+
+.DS_STORE
