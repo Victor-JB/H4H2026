@@ -1,0 +1,8 @@
+{
+  "plugins": [
+    "expo-stream-audio"
+  ],
+  "ios": {
+    "bundleIdentifier": "com.nav.h4h-vision"
+  }
+}

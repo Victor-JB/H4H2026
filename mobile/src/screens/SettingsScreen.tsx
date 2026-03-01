@@ -319,18 +319,7 @@ export default function SettingsScreen() {
             </View>
 
             <View style={styles.switchGroup}>
-              <View style={styles.switchRow}>
-                <View style={styles.switchLabelContainer}>
-                  <Text style={styles.label}>Object Detection</Text>
-                  <Text style={styles.hint}>Enable TFLite object detection</Text>
-                </View>
-                <Switch
-                  value={enableObjectDetection}
-                  onValueChange={setEnableObjectDetection}
-                  trackColor={{ false: '#333', true: '#1a73e8' }}
-                  thumbColor={enableObjectDetection ? '#fff' : '#f4f3f4'}
-                />
-              </View>
+              
 
               <View style={styles.switchRow}>
                 <View style={styles.switchLabelContainer}>
@@ -400,7 +389,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 16,
   },
   sectionTitle: {
     color: '#fff',
