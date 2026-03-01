@@ -157,11 +157,11 @@ void setup() {
   config.pixel_format = PIXFORMAT_JPEG;  
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
   config.fb_location = CAMERA_FB_IN_PSRAM;
-  config.jpeg_quality = 4;
+  config.jpeg_quality = 15;
   config.fb_count = 1;
 
   if (psramFound()) {
-    config.jpeg_quality = 4;
+    config.jpeg_quality = 15;
     config.fb_count = 2;
     config.grab_mode = CAMERA_GRAB_LATEST;
   } else {

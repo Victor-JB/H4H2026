@@ -1,68 +1,61 @@
 /**
- * Minimal ESP32 Camera Demo
- * Hard-coded IP, fetches /capture repeatedly
+ * Optimized ESP32 Camera Demo
+ * Uses continuous MJPEG /stream instead of polling /capture
  */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, Button } from "react-native";
 
 const ESP_IP = "172.20.10.2";
-const CAPTURE_URL = `http://${ESP_IP}/capture`;
+// ==== NEW: Use Port 81 and the /stream endpoint ====
+// In the standard ESP32 CameraWebServer, the stream runs on Port 81
+// to prevent blocking the main control server on Port 80.
+const STREAM_URL = `http://${ESP_IP}:81/stream`;
 
 export default function DemoScreen() {
   const [running, setRunning] = useState(false);
-  const [frameUri, setFrameUri] = useState<string | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // We use a stream key to force the Image component to completely remount
+  // when we stop/start, clearing out any dead sockets or cached broken streams.
+  const [streamKey, setStreamKey] = useState(Date.now());
 
-  useEffect(() => {
-    if (!running) {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-      return;
-    }
+  const handleStart = () => {
+    setStreamKey(Date.now()); // Generate a fresh timestamp
+    setRunning(true);
+  };
 
-    // Poll ESP32 every 300ms
-    timerRef.current = setInterval(() => {
-      // Cache-buster so Image reloads
-      const uri = `${CAPTURE_URL}?t=${Date.now()}`;
-      setFrameUri(uri);
-    }, 300);
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [running]);
+  const handleStop = () => {
+    setRunning(false);
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>ESP32 Camera Feed</Text>
-      <Text style={styles.subtitle}>{CAPTURE_URL}</Text>
+      <Text style={styles.subtitle}>{STREAM_URL}</Text>
 
       <View style={styles.feed}>
-        {frameUri ? (
+        {/* ==== NEW: Let the native Image component handle the MJPEG stream ==== */}
+        {running ? (
           <Image
-            source={{ uri: frameUri }}
+            key={streamKey} // Forces a fresh mount when started
+            source={{ uri: STREAM_URL }}
             style={styles.image}
             resizeMode="contain"
             onError={(e) => {
-              console.log("Image error:", e.nativeEvent);
+              console.log("Stream error or disconnected:", e.nativeEvent);
+              // Optional: auto-stop if the stream hard crashes
+              // setRunning(false); 
             }}
           />
         ) : (
-          <Text style={{ color: "#888" }}>No frame yet</Text>
+          <Text style={{ color: "#888" }}>Camera Stopped</Text>
         )}
       </View>
 
       <View style={styles.controls}>
         {!running ? (
-          <Button title="Start Camera" onPress={() => setRunning(true)} />
+          <Button title="Start Camera" onPress={handleStart} color="#28a745" />
         ) : (
-          <Button title="Stop Camera" onPress={() => setRunning(false)} />
+          <Button title="Stop Camera" onPress={handleStop} color="#dc3545" />
         )}
       </View>
     </View>
