@@ -32,6 +32,7 @@ export async function sendAudioToEsp32(
   });
 
   const base64String = Buffer.from(wavBinary).toString('base64');
+  console.log(`[ESP Playback] Sending ${wavBinary.byteLength} bytes to ESP32. Base64 length: ${base64String.length}`);
   
   // 2. Create the Data URI (ensure the mime type matches your data, e.g., audio/wav or audio/mpeg)
   const sourceUri = `data:audio/wav;base64,${base64String}`;
