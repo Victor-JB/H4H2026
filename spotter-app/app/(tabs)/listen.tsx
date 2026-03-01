@@ -7,7 +7,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from "react-native";
-import { downloadEspWav } from "../../services/esp/audio";
+import { fetchEspAudioBlob } from "../../services/esp/audio";
 import { handleVoiceCommand, VoiceCommandResult } from "../../engine/handleVoiceCommand";
 import { ESP_AUDIO_BASE, ESP_STATUS_URL } from "../../services/esp/config";
 
@@ -70,14 +70,14 @@ export default function ListenScreen() {
       setPhase("downloading");
 
       // 1. Download .wav to local filesystem
-      const localUri = await downloadEspWav(ESP_AUDIO_BASE);
+      const audioBlob = await fetchEspAudioBlob(ESP_AUDIO_BASE);
       if (!isMounted.current) return;
 
       setPhase("transcribing");
 
       // 2-5.  STT → intent → execute → TTS → ESP32 playback
       //       All handled inside handleVoiceCommand
-      const result = await handleVoiceCommand(localUri);
+      const result = await handleVoiceCommand(audioBlob);
       if (!isMounted.current) return;
 
       pushLog(result);

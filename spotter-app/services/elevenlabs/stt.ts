@@ -1,16 +1,9 @@
-export async function elevenLabsSTT(audioUri: string): Promise<string> {
+export async function elevenLabsSTT(audioData: Blob): Promise<string> {
     const apiKey = process.env.EXPO_PUBLIC_Spot;
   if (!apiKey) throw new Error("Missing Spot key");
 
   const form = new FormData();
-
-  const file: any = {
-    uri: audioUri,
-    name: "command.wav",
-    type: "audio/wav",
-  };
-
-  form.append("file", file);
+  form.append("file", audioData, "audio.wav");
 
   // Optional; if ElevenLabs rejects it we’ll remove/adjust
   form.append("model_id", "scribe_v1");

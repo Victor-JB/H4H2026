@@ -60,11 +60,9 @@ async function findObject(target: string): Promise<string> {
  * Full end-to-end voice command pipeline:
  *   Audio URI -> STT -> intent -> execute -> TTS -> ESP32 playback
  */
-export async function handleVoiceCommand(
-  audioUri: string
-): Promise<VoiceCommandResult> {
+export async function handleVoiceCommand(audioData: Blob): Promise<VoiceCommandResult> {
   // 1. Speech-to-text
-  const transcript = await elevenLabsSTT(audioUri);
+  const transcript = await elevenLabsSTT(audioData);
 
   // 2. Intent inference
   const parsed = inferIntent(transcript);
