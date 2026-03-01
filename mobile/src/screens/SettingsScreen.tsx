@@ -22,6 +22,7 @@ import { getTestUrl } from '../services/ESP32Service';
 import axios from 'axios';
 import type { RootStackNavigationProp } from '../types/navigation';
 import type { Esp32ConfigUpdate, StreamingMode, AiVerbosity, FrameQuality } from '../types/esp32';
+import { Checkbox } from 'expo-checkbox';
 
 const STORAGE_KEY_ESP32_CONFIG = '@h4h_esp32_config';
 
@@ -52,6 +53,15 @@ export default function SettingsScreen() {
   const [enableAudioAlerts, setEnableAudioAlerts] = useState(
     config.enableAudioAlerts !== false
   );
+  const [sceneDescription, setSceneDescription] = useState(
+    config.sceneDescription !== false
+  );
+  const [obstacleAvoidance, setObstacleAvoidance] = useState(
+    config.obstacleAvoidance !== false
+  );
+  const [signReading, setSignReading] = useState(
+    config.signReading !== false
+  );
 
   const handleSave = async () => {
     const newConfig: Esp32ConfigUpdate = {
@@ -66,11 +76,14 @@ export default function SettingsScreen() {
       frameQuality,
       enableObjectDetection,
       enableAudioAlerts,
+      sceneDescription,
+      obstacleAvoidance,
+      signReading,
     };
 
     try {
       await AsyncStorage.setItem(STORAGE_KEY_ESP32_CONFIG, JSON.stringify(newConfig));
-      updateConfig(newConfig);
+      (updateConfig as (c: Esp32ConfigUpdate) => void)(newConfig);
       Alert.alert('Success', 'Settings saved!');
       navigation.goBack();
     } catch {
@@ -96,6 +109,46 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Mode Selection</Text>
+        <TouchableOpacity
+          style={styles.checkboxRow}
+          onPress={() => setSceneDescription((v) => !v)}
+          activeOpacity={0.7}
+        >
+          <Checkbox
+            value={sceneDescription}
+            onValueChange={setSceneDescription}
+            color={sceneDescription ? '#1a73e8' : undefined}
+          />
+          <Text style={styles.checkboxLabel}>Scene Description</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.checkboxRow}
+          onPress={() => setObstacleAvoidance((v) => !v)}
+          activeOpacity={0.7}
+        >
+          <Checkbox
+            value={obstacleAvoidance}
+            onValueChange={setObstacleAvoidance}
+            color={obstacleAvoidance ? '#1a73e8' : undefined}
+          />
+          <Text style={styles.checkboxLabel}>Obstacle Avoidance</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.checkboxRow}
+          onPress={() => setSignReading((v) => !v)}
+          activeOpacity={0.7}
+        >
+          <Checkbox
+            value={signReading}
+            onValueChange={setSignReading}
+            color={signReading ? '#1a73e8' : undefined}
+          />
+          <Text style={styles.checkboxLabel}>Sign reading</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Connection Settings */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Connection Settings</Text>
@@ -419,6 +472,16 @@ const styles = StyleSheet.create({
   switchLabelContainer: {
     flex: 1,
     marginRight: 16,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  checkboxLabel: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 12,
   },
   testButton: {
     backgroundColor: '#1a73e8',

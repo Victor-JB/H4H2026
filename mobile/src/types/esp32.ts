@@ -14,6 +14,9 @@ export interface Esp32Config {
   frameQuality: FrameQuality;
   enableObjectDetection: boolean;
   enableAudioAlerts: boolean;
+  sceneDescription: boolean;
+  obstacleAvoidance: boolean;
+  signReading: boolean;
   bufferSize?: number;
   retryAttempts?: number;
   timeout?: number;
