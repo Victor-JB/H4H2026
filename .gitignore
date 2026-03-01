@@ -237,3 +237,5 @@ mobile/web-build/
 secrets.h
 
 .DS_STORE
+
+.expo
