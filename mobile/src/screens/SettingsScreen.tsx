@@ -109,46 +109,6 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Mode Selection</Text>
-        <TouchableOpacity
-          style={styles.checkboxRow}
-          onPress={() => setSceneDescription((v) => !v)}
-          activeOpacity={0.7}
-        >
-          <Checkbox
-            value={sceneDescription}
-            onValueChange={setSceneDescription}
-            color={sceneDescription ? '#1a73e8' : undefined}
-          />
-          <Text style={styles.checkboxLabel}>Scene Description</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.checkboxRow}
-          onPress={() => setObstacleAvoidance((v) => !v)}
-          activeOpacity={0.7}
-        >
-          <Checkbox
-            value={obstacleAvoidance}
-            onValueChange={setObstacleAvoidance}
-            color={obstacleAvoidance ? '#1a73e8' : undefined}
-          />
-          <Text style={styles.checkboxLabel}>Obstacle Avoidance</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.checkboxRow}
-          onPress={() => setSignReading((v) => !v)}
-          activeOpacity={0.7}
-        >
-          <Checkbox
-            value={signReading}
-            onValueChange={setSignReading}
-            color={signReading ? '#1a73e8' : undefined}
-          />
-          <Text style={styles.checkboxLabel}>Sign reading</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Connection Settings */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Connection Settings</Text>
