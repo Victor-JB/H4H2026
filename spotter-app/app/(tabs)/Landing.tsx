@@ -81,10 +81,10 @@ export default function LandingScreen() {
       {/* ── Header / Brand ── */}
       <Animated.View style={[styles.header, titleAnimStyle]}>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>✦  AI-Powered Assistive Tech</Text>
+          <Text style={styles.badgeText}>✦  Supporting 2.2 Billion Worldwide</Text>
         </View>
         <Text style={styles.title}>BlindSpot</Text>
-        <Text style={styles.tagline}>Affordable Eyes</Text>
+        <Text style={styles.tagline}>Vision assistance for the 90%</Text>
       </Animated.View>
 
       {/* ── Cap / Logo ── */}
@@ -104,13 +104,22 @@ export default function LandingScreen() {
 
       {/* ── Bottom Section ── */}
       <Animated.View style={[styles.bottomSection, fadeStyle]}>
-        {/* Feature pills */}
-        <View style={styles.pillRow}>
-          {['Real-Time', 'Object Detection', 'Audio Alerts'].map((f) => (
-            <View key={f} style={styles.pill}>
-              <Text style={styles.pillText}>{f}</Text>
-            </View>
-          ))}
+        {/* Mission Stats */}
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>2.2B</Text>
+            <Text style={styles.statLabel}>People affected</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>90%</Text>
+            <Text style={styles.statLabel}>Underserved</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, styles.statValueGold]}>~$50</Text>
+            <Text style={styles.statLabel}>vs. $4,250+</Text>
+          </View>
         </View>
 
         {/* Buttons */}
@@ -179,9 +188,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   tagline: {
-    fontSize: 16,
-    color: '#7A96BE',
-    marginTop: 8,
+    fontSize: 22,
+    color: '#fff000',
+    marginTop: 22,
+    marginBottom: 0,
     letterSpacing: 0.2,
     textAlign: 'center',
     fontWeight: '400',
@@ -226,23 +236,40 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 20,
   },
-  pillRow: {
+
+  // ── Stats Row ────────────────────────────
+  statsRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  pill: {
-    backgroundColor: 'rgba(29, 111, 232, 0.12)',
+    alignItems: 'center',
+    backgroundColor: 'rgba(13, 31, 60, 0.85)',
     borderWidth: 1,
-    borderColor: 'rgba(29, 111, 232, 0.32)',
-    borderRadius: 100,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    borderColor: '#1A3464',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
   },
-  pillText: {
-    color: '#7AB8FF',
-    fontSize: 12,
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 3,
+  },
+  statDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: '#1A3464',
+  },
+  statValue: {
+    color: '#F0F4FF',
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  statValueGold: {
+    color: '#FFD166',
+  },
+  statLabel: {
+    color: '#3D5880',
+    fontSize: 11,
     fontWeight: '500',
     letterSpacing: 0.2,
   },
