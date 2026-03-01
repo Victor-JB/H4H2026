@@ -1,3 +1,6 @@
+import { Audio } from 'expo-audio'; // or 'expo-av'
+import { Buffer } from 'buffer';
+
 /**
  * POST a raw binary .wav file to the ESP32 playback endpoint.
  *
@@ -27,6 +30,16 @@ export async function sendAudioToEsp32(
     },
     body: wavBinary,
   });
+
+  const base64String = Buffer.from(wavBinary).toString('base64');
+  
+  // 2. Create the Data URI (ensure the mime type matches your data, e.g., audio/wav or audio/mpeg)
+  const sourceUri = `data:audio/wav;base64,${base64String}`;
+
+  // 3. Load and play
+  const player = await Audio.createPlayer(sourceUri);
+  player.play();
+    
 
   if (!res.ok) {
     const errBody = await res.text().catch(() => "");
