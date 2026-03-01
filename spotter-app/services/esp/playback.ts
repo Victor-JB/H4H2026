@@ -1,4 +1,4 @@
-import { Audio } from 'expo-audio'; // or 'expo-av'
+import { Audio } from 'expo-av'; // or 'expo-av'
 import { Buffer } from 'buffer';
 
 /**
@@ -38,9 +38,12 @@ export async function sendAudioToEsp32(
   const sourceUri = `data:audio/wav;base64,${base64String}`;
 
   // 3. Load and play
-  const player = await Audio.createPlayer(sourceUri);
-  player.play();
-    
+  try {
+    const { sound } = await Audio.Sound.createAsync({ uri: sourceUri });
+    await sound.playAsync();
+  } catch (error) {
+    console.error("[ESP Playback] Failed to play locally on phone:", error);
+  }
 
   if (!res.ok) {
     const errBody = await res.text().catch(() => "");
