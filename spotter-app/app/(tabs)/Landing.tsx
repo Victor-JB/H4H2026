@@ -14,6 +14,8 @@ const CAP_SIZE = 160;
 export default function LandingScreen() {
   const router = useRouter();
   const capOffset = useSharedValue(400);
+  const titleOffset = useSharedValue(80);
+  const titleScale = useSharedValue(0.85);
 
   useEffect(() => {
     capOffset.value = withTiming(0, {
@@ -22,13 +24,33 @@ export default function LandingScreen() {
     });
   }, [capOffset]);
 
+  useEffect(() => {
+    titleOffset.value = withTiming(0, {
+      duration: 600,
+      easing: Easing.out(Easing.cubic),
+    });
+    titleScale.value = withTiming(1, {
+      duration: 600,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [titleOffset, titleScale]);
+
   const capAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: capOffset.value }],
   }));
 
+  const titleAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: titleOffset.value },
+      { scale: titleScale.value },
+    ],
+  }));
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Navision</Text>
+      <Animated.View style={[styles.titleWrapper, titleAnimatedStyle]}>
+        <Animated.Text style={styles.title}>BlindSpot</Animated.Text>
+      </Animated.View>
 
       <View style={styles.capContainer}>
         <Animated.View style={[styles.capWrapper, capAnimatedStyle]}>
@@ -72,6 +94,9 @@ const styles = StyleSheet.create({
     paddingTop: 80,
     paddingBottom: 48,
     paddingHorizontal: 24,
+  },
+  titleWrapper: {
+    zIndex: 1,
   },
   title: {
     fontSize: 36,
