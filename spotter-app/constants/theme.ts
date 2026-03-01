@@ -5,24 +5,55 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// Primary brand colors
+export const Brand = {
+  // Deep navy backgrounds
+  bgDeep:   '#060F1E',
+  bgMid:    '#0D1F3C',
+  bgLight:  '#142952',
+
+  // Borders / dividers
+  border:      '#1A3464',
+  borderLight: 'rgba(33, 72, 132, 0.4)',
+
+  // Primary blue
+  blue:      '#1D6FE8',
+  blueLight: '#3D8EFF',
+  blueDark:  '#0D4FAD',
+
+  // Accent yellow / gold
+  yellow:     '#FFD166',
+  yellowDark: '#C9A020',
+
+  // Text
+  textPrimary:   '#F0F4FF',
+  textSecondary: '#7A96BE',
+  textMuted:     '#3D5880',
+
+  // Semantic
+  success: '#22C55E',
+  error:   '#EF4444',
+  warning: '#F59E0B',
+};
+
+const tintColorLight = Brand.blue;
+const tintColorDark  = Brand.yellow;
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    text: Brand.textPrimary,
+    background: Brand.bgDeep,
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    icon: Brand.textSecondary,
+    tabIconDefault: Brand.textMuted,
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: Brand.textPrimary,
+    background: Brand.bgDeep,
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    icon: Brand.textSecondary,
+    tabIconDefault: Brand.textMuted,
     tabIconSelected: tintColorDark,
   },
 };
