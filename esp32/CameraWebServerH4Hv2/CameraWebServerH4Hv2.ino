@@ -234,7 +234,7 @@ void setup() {
 
   // 6. Init Speaker Output
   I2S_SPEAKER.setPins(I2S_SPK_BCLK, I2S_SPK_LRC, I2S_SPK_DOUT, -1, -1);
-  if (!I2S_SPEAKER.begin(I2S_MODE_STD_TX, 16000, I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO)) {
+  if (!I2S_SPEAKER.begin(I2S_MODE_STD, 16000, I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO)) {
     Serial.println("Failed to initialize I2S Speaker!");
   }
 
