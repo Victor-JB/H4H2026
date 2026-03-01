@@ -20,7 +20,6 @@
     "babel-preset-expo": "~54.0.10",
     "eslint-config-expo": "~10.0.0",
     "expo": "~54.0.33",
-    "expo-audio": "~1.1.1",
     "expo-av": "~16.0.8",
     "expo-checkbox": "~5.0.8",
     "expo-dev-client": "~6.0.20",
