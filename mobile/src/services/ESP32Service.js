@@ -19,6 +19,9 @@ export const ESP32_DEFAULTS = {
   frameQuality: 'medium', // 'low', 'medium', 'high'
   enableObjectDetection: true,
   enableAudioAlerts: true,
+  sceneDescription: true,
+  obstacleAvoidance: true,
+  signReading: true,
   // Advanced settings
   bufferSize: 3, // number of frames to buffer
   retryAttempts: 3,

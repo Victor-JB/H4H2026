@@ -1,6 +1,6 @@
 /**
- * SettingsScreen.js
- * 
+ * SettingsScreen.tsx
+ *
  * Settings screen for configuring ESP32 connection and AI processing options.
  */
 
@@ -20,33 +20,51 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Esp32ConfigContext } from '../../App';
 import { getTestUrl } from '../services/ESP32Service';
 import axios from 'axios';
+import type { RootStackNavigationProp } from '../types/navigation';
+import type { Esp32ConfigUpdate, StreamingMode, AiVerbosity, FrameQuality } from '../types/esp32';
+import { Checkbox } from 'expo-checkbox';
 
 const STORAGE_KEY_ESP32_CONFIG = '@h4h_esp32_config';
 
 export default function SettingsScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<RootStackNavigationProp<'Settings'>>();
   const { config, updateConfig } = useContext(Esp32ConfigContext);
 
   const [ip, setIp] = useState(config.ip);
   const [port, setPort] = useState(String(config.port));
-  const [streamingMode, setStreamingMode] = useState(config.streamingMode || 'snapshot');
+  const [streamingMode, setStreamingMode] = useState<StreamingMode>(
+    (config.streamingMode as StreamingMode) || 'snapshot'
+  );
   const [snapshotInterval, setSnapshotInterval] = useState(
     String(config.snapshotInterval || 100)
   );
   const [aiEnabled, setAiEnabled] = useState(config.aiEnabled !== false);
-  const [aiVerbosity, setAiVerbosity] = useState(config.aiVerbosity || 'medium');
+  const [aiVerbosity, setAiVerbosity] = useState<AiVerbosity>(
+    (config.aiVerbosity as AiVerbosity) || 'medium'
+  );
   const [targetLatency, setTargetLatency] = useState(String(config.targetLatency || 200));
   const [maxLatency, setMaxLatency] = useState(String(config.maxLatency || 500));
-  const [frameQuality, setFrameQuality] = useState(config.frameQuality || 'medium');
+  const [frameQuality, setFrameQuality] = useState<FrameQuality>(
+    (config.frameQuality as FrameQuality) || 'medium'
+  );
   const [enableObjectDetection, setEnableObjectDetection] = useState(
     config.enableObjectDetection !== false
   );
   const [enableAudioAlerts, setEnableAudioAlerts] = useState(
     config.enableAudioAlerts !== false
   );
+  const [sceneDescription, setSceneDescription] = useState(
+    config.sceneDescription !== false
+  );
+  const [obstacleAvoidance, setObstacleAvoidance] = useState(
+    config.obstacleAvoidance !== false
+  );
+  const [signReading, setSignReading] = useState(
+    config.signReading !== false
+  );
 
   const handleSave = async () => {
-    const newConfig = {
+    const newConfig: Esp32ConfigUpdate = {
       ip: ip.trim(),
       port: parseInt(port, 10) || 80,
       streamingMode,
@@ -58,14 +76,17 @@ export default function SettingsScreen() {
       frameQuality,
       enableObjectDetection,
       enableAudioAlerts,
+      sceneDescription,
+      obstacleAvoidance,
+      signReading,
     };
 
     try {
       await AsyncStorage.setItem(STORAGE_KEY_ESP32_CONFIG, JSON.stringify(newConfig));
-      updateConfig(newConfig);
+      (updateConfig as (c: Esp32ConfigUpdate) => void)(newConfig);
       Alert.alert('Success', 'Settings saved!');
       navigation.goBack();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to save settings');
     }
   };
@@ -78,15 +99,56 @@ export default function SettingsScreen() {
 
     try {
       const url = getTestUrl(testConfig);
-      const response = await axios.get(url, { timeout: 5000 });
+      await axios.get(url, { timeout: 5000 });
       Alert.alert('Success', 'Connection successful!');
     } catch (error) {
-      Alert.alert('Error', `Failed to connect: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      Alert.alert('Error', `Failed to connect: ${message}`);
     }
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Mode Selection</Text>
+        <TouchableOpacity
+          style={styles.checkboxRow}
+          onPress={() => setSceneDescription((v) => !v)}
+          activeOpacity={0.7}
+        >
+          <Checkbox
+            value={sceneDescription}
+            onValueChange={setSceneDescription}
+            color={sceneDescription ? '#1a73e8' : undefined}
+          />
+          <Text style={styles.checkboxLabel}>Scene Description</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.checkboxRow}
+          onPress={() => setObstacleAvoidance((v) => !v)}
+          activeOpacity={0.7}
+        >
+          <Checkbox
+            value={obstacleAvoidance}
+            onValueChange={setObstacleAvoidance}
+            color={obstacleAvoidance ? '#1a73e8' : undefined}
+          />
+          <Text style={styles.checkboxLabel}>Obstacle Avoidance</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.checkboxRow}
+          onPress={() => setSignReading((v) => !v)}
+          activeOpacity={0.7}
+        >
+          <Checkbox
+            value={signReading}
+            onValueChange={setSignReading}
+            color={signReading ? '#1a73e8' : undefined}
+          />
+          <Text style={styles.checkboxLabel}>Sign reading</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Connection Settings */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Connection Settings</Text>
@@ -231,7 +293,7 @@ export default function SettingsScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>AI Verbosity</Text>
               <View style={styles.radioGroup}>
-                {['low', 'medium', 'high'].map((level) => (
+                {(['low', 'medium', 'high'] as const).map((level) => (
                   <TouchableOpacity
                     key={level}
                     style={[
@@ -294,7 +356,7 @@ export default function SettingsScreen() {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Frame Quality</Text>
           <View style={styles.radioGroup}>
-            {['low', 'medium', 'high'].map((quality) => (
+            {(['low', 'medium', 'high'] as const).map((quality) => (
               <TouchableOpacity
                 key={quality}
                 style={[
@@ -410,6 +472,16 @@ const styles = StyleSheet.create({
   switchLabelContainer: {
     flex: 1,
     marginRight: 16,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  checkboxLabel: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 12,
   },
   testButton: {
     backgroundColor: '#1a73e8',

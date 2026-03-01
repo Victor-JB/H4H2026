@@ -1,0 +1,9 @@
+{
+  "name": "h4h2026",
+  "private": true,
+  "scripts": {
+    "start": "cd mobile && npx expo start --dev-client",
+    "start:clear": "cd mobile && npx expo start --dev-client --clear",
+    "start:spotter": "cd spotter-app && npx expo start"
+  }
+}

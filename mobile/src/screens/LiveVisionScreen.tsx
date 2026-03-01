@@ -1,17 +1,17 @@
 /**
- * LiveVisionScreen.js
- * 
+ * LiveVisionScreen.tsx
+ *
  * Main screen displaying the live camera feed from ESP32.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useContext } from 'react';
 import { Esp32ConfigContext } from '../../App';
+import type { RootStackNavigationProp } from '../types/navigation';
 
 export default function LiveVisionScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<RootStackNavigationProp<'LiveVision'>>();
   const { config } = useContext(Esp32ConfigContext);
 
   return (
@@ -59,4 +59,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-

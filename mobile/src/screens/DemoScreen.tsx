@@ -1,6 +1,6 @@
 /**
- * DemoScreen.js
- * 
+ * DemoScreen.tsx
+ *
  * Demo/test page for ESP32 camera functionality with placeholder video feed.
  */
 
@@ -18,13 +18,21 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Esp32ConfigContext } from '../../App';
 import { getStreamUrl } from '../services/ESP32Service';
+import type { RootStackNavigationProp } from '../types/navigation';
+
+type ConnectionStatus = 'disconnected' | 'connecting' | 'connected';
+
+interface FrameInfo {
+  uri: string;
+  timestamp: number;
+}
 
 export default function DemoScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<RootStackNavigationProp<'Demo'>>();
   const { config } = useContext(Esp32ConfigContext);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [currentFrame, setCurrentFrame] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState('disconnected');
+  const [currentFrame, setCurrentFrame] = useState<FrameInfo | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [fps, setFps] = useState(0);
   const [frameCount, setFrameCount] = useState(0);
   const [lastFrameTime, setLastFrameTime] = useState(Date.now());
@@ -44,7 +52,7 @@ export default function DemoScreen() {
       }
       setLastFrameTime(now);
       setFrameCount((prev) => prev + 1);
-      
+
       // In a real implementation, this would fetch the actual frame from ESP32
       // For now, we'll use a placeholder
       setCurrentFrame({ uri: streamUrl, timestamp: Date.now() });
@@ -63,7 +71,7 @@ export default function DemoScreen() {
     setConnectionStatus('connecting');
     setFrameCount(0);
     setLastFrameTime(Date.now());
-    
+
     // Simulate connection delay
     setTimeout(() => {
       setConnectionStatus('connected');
@@ -77,7 +85,7 @@ export default function DemoScreen() {
     setFps(0);
   };
 
-  const getStatusColor = () => {
+  const getStatusColor = (): string => {
     switch (connectionStatus) {
       case 'connected':
         return '#34a853';
@@ -366,4 +374,3 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
-
