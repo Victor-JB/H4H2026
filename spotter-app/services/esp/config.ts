@@ -1,48 +1,25 @@
 /**
- * ESP32 Configuration Service
- * 
- * Service for managing ESP32 camera streaming server configuration.
+ * Central configuration for ESP32 and backend services.
+ *
+ * Change the IP/port here once and every service picks it up.
  */
 
-export const ESP32_DEFAULTS = {
-  ip: '192.168.43.184',
-  port: 80,
-  streamingMode: 'snapshot' as 'snapshot' | 'mjpeg',
-  snapshotInterval: 100,
-  // AI and processing settings
-  aiEnabled: true,
-  aiVerbosity: 'medium' as 'low' | 'medium' | 'high',
-  // Latency settings
-  targetLatency: 200, // milliseconds
-  maxLatency: 500, // milliseconds
-  // Performance settings
-  frameQuality: 'medium' as 'low' | 'medium' | 'high',
-  enableObjectDetection: true,
-  enableAudioAlerts: true,
-  sceneDescription: true,
-  obstacleAvoidance: true,
-  signReading: true,
-  // Advanced settings
-  bufferSize: 3, // number of frames to buffer
-  retryAttempts: 3,
-  timeout: 5000, // milliseconds
-};
+// ── Network ────────────────────────────────────────────────
+export const ESP_IP = "172.20.10.2";
 
-export type Esp32Config = typeof ESP32_DEFAULTS;
+/** Camera server (port 80) */
+export const ESP_CAM_BASE = `http://${ESP_IP}`;
 
-export function getStreamUrl(config: Esp32Config): string {
-  const { ip, port, streamingMode } = config;
-  const baseUrl = `http://${ip}:${port}`;
-  
-  if (streamingMode === 'mjpeg') {
-    return `${baseUrl}/stream`;
-  } else {
-    return `${baseUrl}/snapshot`;
-  }
-}
+/** Audio record / playback server (port 8080) */
+export const ESP_AUDIO_BASE = `http://${ESP_IP}:8080`;
 
-export function getTestUrl(config: Pick<Esp32Config, 'ip' | 'port'>): string {
-  const { ip, port } = config;
-  return `http://${ip}:${port}/test`;
-}
+/** Audio status endpoint */
+export const ESP_STATUS_URL = `${ESP_AUDIO_BASE}/status`;
+
+/** YOLO / scene-analysis backend (ngrok) */
+export const BACKEND_API_BASE =
+  "https://letisha-unmetalled-enzymatically.ngrok-free.dev";
+
+/** Default YOLO confidence threshold */
+export const YOLO_CONF = 0.35;
 

@@ -29,18 +29,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="stt-test"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="audio-listener"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="explore"
         options={{
           href: null,

@@ -8,26 +8,31 @@ import {
   SafeAreaView,
 } from "react-native";
 import { downloadEspWav } from "../../services/esp/audio";
-import { handleVoiceCommand } from "../../engine/handleVoiceCommand";
-
-// ── ESP32 audio server (port 8080) ──────────────────────────
-const ESP_IP = "172.20.10.2"; // same IP as audio-listener
-const ESP_AUDIO_BASE = `http://${ESP_IP}:8080`;
-const STATUS_URL = `${ESP_AUDIO_BASE}/status`;
+import { handleVoiceCommand, VoiceCommandResult } from "../../engine/handleVoiceCommand";
+import { ESP_AUDIO_BASE, ESP_STATUS_URL } from "../../services/esp/config";
 
 // ── Types ───────────────────────────────────────────────────
+type Phase =
+  | "polling"
+  | "downloading"
+  | "transcribing"
+  | "executing"
+  | "speaking"
+  | "done"
+  | "error";
+
 interface LogEntry {
   id: number;
   transcript: string;
   intent: string;
-  action: string;
+  response: string;
+  espOk: boolean;
+  warning?: string;
   time: string;
 }
 
 export default function ListenScreen() {
-  const [phase, setPhase] = useState<
-    "polling" | "downloading" | "transcribing" | "done" | "error"
-  >("polling");
+  const [phase, setPhase] = useState<Phase>("polling");
   const [errorMsg, setErrorMsg] = useState("");
   const [log, setLog] = useState<LogEntry[]>([]);
   const logIdRef = useRef(0);
@@ -35,56 +40,55 @@ export default function ListenScreen() {
   const isProcessing = useRef(false);
 
   // ── Append to visible log ────────────────────────────────
-  const pushLog = useCallback(
-    (transcript: string, intent: string, action: string) => {
-      logIdRef.current += 1;
-      const entry: LogEntry = {
-        id: logIdRef.current,
-        transcript,
-        intent,
-        action,
-        time: new Date().toLocaleTimeString(),
-      };
-      setLog((prev) => [entry, ...prev].slice(0, 50)); // keep last 50
-    },
-    []
-  );
+  const pushLog = useCallback((r: VoiceCommandResult) => {
+    logIdRef.current += 1;
+    const entry: LogEntry = {
+      id: logIdRef.current,
+      transcript: r.transcript,
+      intent: r.intent,
+      response: r.response,
+      espOk: r.espPlaybackOk,
+      warning: r.error,
+      time: new Date().toLocaleTimeString(),
+    };
+    setLog((prev) => [entry, ...prev].slice(0, 50));
+  }, []);
 
   // ── Core super-loop tick ─────────────────────────────────
   const tick = useCallback(async () => {
     if (!isMounted.current || isProcessing.current) return;
 
     try {
-      const res = await fetch(STATUS_URL);
+      // Poll ESP32 status – does it have a recorded clip ready?
+      const res = await fetch(ESP_STATUS_URL);
       if (!res.ok) return;
       const data = await res.json();
       if (!data.ready) return;
 
-      // Audio is ready — enter processing gate
+      // ── Audio ready → enter processing gate ──────────────
       isProcessing.current = true;
       setPhase("downloading");
 
       // 1. Download .wav to local filesystem
       const localUri = await downloadEspWav(ESP_AUDIO_BASE);
-
       if (!isMounted.current) return;
+
       setPhase("transcribing");
 
-      // 2. STT → intent → action (reuses existing engine)
+      // 2-5.  STT → intent → execute → TTS → ESP32 playback
+      //       All handled inside handleVoiceCommand
       const result = await handleVoiceCommand(localUri);
-
       if (!isMounted.current) return;
-      pushLog(result.transcript, result.intent, result.action);
+
+      pushLog(result);
       setPhase("done");
     } catch (e: any) {
       if (!isMounted.current) return;
       setErrorMsg(e?.message ?? String(e));
       setPhase("error");
     } finally {
-      // Always release the gate so polling resumes
       isProcessing.current = false;
       if (isMounted.current) {
-        // Brief pause before resuming poll to avoid hammering after processing
         setTimeout(() => {
           if (isMounted.current) setPhase("polling");
         }, 500);
@@ -92,7 +96,7 @@ export default function ListenScreen() {
     }
   }, [pushLog]);
 
-  // ── Polling interval ─────────────────────────────────────
+  // ── Polling interval (every 500 ms) ──────────────────────
   useEffect(() => {
     isMounted.current = true;
     const id = setInterval(tick, 500);
@@ -103,44 +107,61 @@ export default function ListenScreen() {
   }, [tick]);
 
   // ── UI ────────────────────────────────────────────────────
-  const phaseLabel: Record<string, string> = {
+  const phaseLabel: Record<Phase, string> = {
     polling: "Listening for ESP32 audio…",
     downloading: "Downloading .wav from ESP32…",
-    transcribing: "Transcribing via ElevenLabs…",
-    done: "Processed! Resuming…",
+    transcribing: "Processing voice command…",
+    executing: "Running command…",
+    speaking: "Sending response to ESP32…",
+    done: "Done — resuming…",
     error: `Error: ${errorMsg}`,
   };
+
+  const busy =
+    phase === "downloading" ||
+    phase === "transcribing" ||
+    phase === "executing" ||
+    phase === "speaking";
 
   return (
     <SafeAreaView style={s.safe}>
       <View style={s.header}>
-        <Text style={s.title}>Spotter Listen</Text>
+        <Text style={s.title}>Spotter</Text>
         <View style={s.statusRow}>
-          {(phase === "downloading" || phase === "transcribing") && (
+          {busy && (
             <ActivityIndicator color="#4af" style={{ marginRight: 8 }} />
           )}
-          <Text style={s.phase}>{phaseLabel[phase]}</Text>
+          <Text style={[s.phase, phase === "error" && { color: "#f66" }]}>
+            {phaseLabel[phase]}
+          </Text>
         </View>
       </View>
 
       <ScrollView style={s.log} contentContainerStyle={{ paddingBottom: 40 }}>
         {log.length === 0 && (
           <Text style={s.empty}>
-            No voice commands yet. Speak into the ESP32 mic and it will appear
-            here.
+            No voice commands yet.{"\n"}Speak into the ESP32 mic and responses
+            will appear here.
           </Text>
         )}
         {log.map((entry) => (
           <View key={entry.id} style={s.card}>
             <Text style={s.time}>{entry.time}</Text>
             <Text style={s.transcript}>"{entry.transcript}"</Text>
-            <Text style={s.intent}>
-              {entry.intent}
-              {entry.action.startsWith("RUN_FIND:")
-                ? ` → ${entry.action.replace("RUN_FIND:", "")}`
-                : ""}
-            </Text>
-            <Text style={s.action}>→ {entry.action}</Text>
+            <Text style={s.intent}>{entry.intent}</Text>
+            <Text style={s.response}>{entry.response}</Text>
+            <View style={s.metaRow}>
+              <Text
+                style={[s.badge, entry.espOk ? s.badgeOk : s.badgeWarn]}
+              >
+                {entry.espOk ? "ESP32 ✓" : "ESP32 ✗"}
+              </Text>
+              {entry.warning ? (
+                <Text style={s.warning} numberOfLines={2}>
+                  {entry.warning}
+                </Text>
+              ) : null}
+            </View>
           </View>
         ))}
       </ScrollView>
@@ -148,24 +169,47 @@ export default function ListenScreen() {
   );
 }
 
+// ── Styles ──────────────────────────────────────────────────
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#000" },
+  safe: { flex: 1, backgroundColor: "#060E1A" },
   header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  title: { color: "#fff", fontSize: 22, fontWeight: "700" },
+  title: { color: "#fff", fontSize: 24, fontWeight: "800", letterSpacing: 1 },
   statusRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
   phase: { color: "#4af", fontFamily: "monospace", fontSize: 13 },
   log: { flex: 1, paddingHorizontal: 20 },
-  empty: { color: "#666", marginTop: 32, textAlign: "center" },
+  empty: {
+    color: "#555",
+    marginTop: 40,
+    textAlign: "center",
+    lineHeight: 22,
+  },
   card: {
-    backgroundColor: "#111",
-    borderRadius: 10,
+    backgroundColor: "#0F1C30",
+    borderRadius: 12,
     padding: 14,
-    marginTop: 10,
+    marginTop: 12,
     borderLeftWidth: 3,
     borderLeftColor: "#4af",
   },
-  time: { color: "#888", fontSize: 11, marginBottom: 4 },
-  transcript: { color: "#fff", fontSize: 15, marginBottom: 4 },
-  intent: { color: "#4af", fontWeight: "600", fontSize: 13 },
-  action: { color: "#666", fontSize: 12, marginTop: 2 },
+  time: { color: "#667", fontSize: 11, marginBottom: 4 },
+  transcript: {
+    color: "#ccc",
+    fontSize: 14,
+    fontStyle: "italic",
+    marginBottom: 6,
+  },
+  intent: { color: "#4af", fontWeight: "700", fontSize: 13, marginBottom: 4 },
+  response: { color: "#fff", fontSize: 15, lineHeight: 21, marginBottom: 8 },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  badge: {
+    fontSize: 11,
+    fontWeight: "600",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  badgeOk: { backgroundColor: "#143d1e", color: "#5f5" },
+  badgeWarn: { backgroundColor: "#3d2714", color: "#fa5" },
+  warning: { color: "#a86", fontSize: 11, flex: 1 },
 });
