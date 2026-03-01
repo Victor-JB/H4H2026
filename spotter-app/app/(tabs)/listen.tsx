@@ -11,7 +11,7 @@ import { downloadEspWav } from "../../services/esp/audio";
 import { handleVoiceCommand } from "../../engine/handleVoiceCommand";
 
 // ── ESP32 audio server (port 8080) ──────────────────────────
-const ESP_IP = "172.20.10.9"; // same IP as audio-listener
+const ESP_IP = "172.20.10.2"; // same IP as audio-listener
 const ESP_AUDIO_BASE = `http://${ESP_IP}:8080`;
 const STATUS_URL = `${ESP_AUDIO_BASE}/status`;
 
