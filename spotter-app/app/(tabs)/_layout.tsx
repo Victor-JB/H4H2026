@@ -23,6 +23,18 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
+      {/* <Tabs.Screen
+        name="stt-test"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="audio-listener"
+        options={{
+          href: null,
+        }}
+      /> */}
       <Tabs.Screen
         name="explore"
         options={{
@@ -54,18 +66,7 @@ export default function TabLayout() {
           href: null,
         }}
       />
-      <Tabs.Screen
-        name="stt-test"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="audio-listener"
-        options={{
-          href: null,
-        }}
-      />
+      
     </Tabs>
   );
 }

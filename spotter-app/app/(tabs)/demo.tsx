@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Button } from "react-native";
 import { WebView } from "react-native-webview";
 
-const ESP_IP = "172.20.10.9";
-const STREAM_URL = `http://${ESP_IP}:81/stream`;
+const ESP_IP = "172.20.10.2";
+const STREAM_URL = `http://${ESP_IP}:80/stream`;
 
 export default function StreamDebugger() {
   const [running, setRunning] = useState(false);
