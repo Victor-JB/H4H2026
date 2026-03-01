@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { View, Text, Button, StyleSheet, Image, ScrollView } from "react-native";
 import { runSceneOnce } from "@/services/sense/scene";
+import { sceneToText } from "@/engine/sceneToText";
 
 const API_BASE = "https://letisha-unmetalled-enzymatically.ngrok-free.dev";
 const ESP_BASE = "http://172.20.10.2"; // change if your ESP has a different IP
@@ -17,19 +18,29 @@ export default function SceneTestScreen() {
   }
 
   async function runScene() {
-    setStatus("capturing + uploading + running YOLO…");
-    setOut("");
-    try {
-      const res = await runSceneOnce({ apiBase: API_BASE, espBase: ESP_BASE, conf: 0.35 });
-      const lines = res.detections.slice(0, 15).map(
-        (d) => `${d.label} (${Math.round(d.conf * 100)}%) @ ${d.pos}`
-      );
-      setOut(`latency: ${res.latency_ms}ms\ncount: ${res.count}\n\n${lines.join("\n")}`);
-      setStatus("done ✅");
-    } catch (e: any) {
-      setStatus(`error: ${e?.message ?? String(e)}`);
-    }
+  setStatus("capturing + uploading + running YOLO…");
+  setOut("");
+  try {
+    const res = await runSceneOnce({ apiBase: API_BASE, espBase: ESP_BASE, conf: 0.35 });
+
+    // 1) Natural language output (what you'll feed to ElevenLabs TTS)
+    const spoken = sceneToText(res, { maxPerSide: 2 });
+
+    // 2) Optional debug lines (keep for now while tuning)
+    const lines = res.detections.slice(0, 15).map(
+      (d) => `${d.label} (${Math.round(d.conf * 100)}%) @ ${d.pos}`
+    );
+
+    setOut(
+      `SPOKEN:\n${spoken}\n\n` +
+      `DEBUG:\nlatency: ${res.latency_ms}ms\ncount: ${res.count}\n\n${lines.join("\n")}`
+    );
+
+    setStatus("done ✅");
+  } catch (e: any) {
+    setStatus(`error: ${e?.message ?? String(e)}`);
   }
+}
 
   return (
     <View style={styles.container}>
