@@ -60,7 +60,7 @@ async def scene_upload(image: UploadFile = File(...), conf: float = 0.35):
             detections.append({
                 "label": model.names[int(cls)],
                 "conf": float(score),
-                "pos": bucket_lr(xc, w),``
+                "pos": bucket_lr(xc, w),
                 "bbox": [x1, y1, x2, y2],
             })
 
