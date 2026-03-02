@@ -1,4 +1,4 @@
-# BlindSpot: 2026 H4H2026 3rd Place Winner
+# 🏆 BlindSpot: 2026 H4H2026 3rd Place Winner
 
 Hack 4 Humanity 2026 project — a React Native / Expo app that streams video from a Seeed Studio XIAO ESP32-S3 Sense camera over a phone hotspot and feeds frames into a TFLite navigation-assistance pipeline with audio output.
 
