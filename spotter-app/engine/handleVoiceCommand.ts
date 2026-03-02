@@ -3,6 +3,7 @@ import { elevenLabsTTS } from "../services/elevenlabs/tts";
 import { inferIntent, Intent } from "./inferIntent";
 import { sceneToText } from "./sceneToText";
 import { runSceneOnce } from "../services/sense/scene";
+import { runSignOnce } from "../services/sense/sign";
 import { sendAudioToEsp32 } from "../services/esp/playback";
 import {
   ESP_CAM_BASE,
@@ -28,6 +29,21 @@ async function describeScene(): Promise<string> {
     conf: YOLO_CONF,
   });
   return sceneToText(scene);
+}
+
+async function readSigns(): Promise<string> {
+  const result = await runSignOnce({
+    apiBase: BACKEND_API_BASE,
+    espBase: ESP_CAM_BASE,
+    conf: 0.30,
+  });
+
+  // The backend already provides a human-readable summary
+  if (result.with_text > 0) {
+    return result.summary;
+  }
+
+  return "I don't see any readable text or signs right now. Try pointing the camera at a sign.";
 }
 
 async function findObject(target: string): Promise<string> {
@@ -86,8 +102,7 @@ export async function handleVoiceCommand(audioData: Blob): Promise<VoiceCommandR
       break;
 
     case "SIGN":
-      response =
-        "Sign reading isn't available yet, but I can describe the scene if you ask.";
+      response = await readSigns();
       break;
 
     case "FIND":
