@@ -1,5 +1,5 @@
 # 🏆 Blindspot: 2026 H4H2026 3rd Place Winner
-![Photo of us winning the award](https://github.com/Victor-JB/H4H2026/edit/main/photos/blindspot-h4h-w.png)
+![Photo of us winning the award](/images/blindspot-h4h-w.png)
 
 Hack 4 Humanity 2026 project — a React Native / Expo app that streams video from a Seeed Studio XIAO ESP32-S3 Sense camera over a phone hotspot and feeds frames into a TFLite navigation-assistance pipeline with audio output.
 
@@ -8,7 +8,7 @@ The premise is a very cheap, easily manufacturable yet advanced navigation asist
 - Passive object / dangerous objects detection and avoidance
 - Text reader geared towards street signs, other important pedestrian signs, with (future incoming) the capability to identify all sorts of text in an environment that would be helpful to see (user can tailor how much they want read, from pedetrian signs to restaurant signs)
 
-![Photo of the product](https://github.com/Victor-JB/H4H2026/edit/main/photos/IMG_5971.HEIC)
+![Photo of the product](/images/IMG_5971.HEIC)
 
 ## Architecture
 
@@ -33,7 +33,7 @@ The premise is a very cheap, easily manufacturable yet advanced navigation asist
 
 See [esp32/README.md](esp32/README.md) for details.
 
-![Photo of product hardware](https://github.com/Victor-JB/H4H2026/edit/main/photos/hardware.png)
+![Photo of product hardware](/images/hardware.png)
 
 ### 3. Mobile App
 
@@ -49,8 +49,9 @@ npx expo run:android   # or: npx expo run:ios
 4. Tap **Test Connection** to verify.
 5. Return to the Live view to see the camera feed and hear navigation alerts.
 
-![Page 1 of the app](https://github.com/Victor-JB/H4H2026/edit/main/photos/blindspot-h4h-app-page1.png)
-![Page 1 of the app](https://github.com/Victor-JB/H4H2026/edit/main/photos/blindspot-h4h-app-page2.png)
+![Page 1 of the app](/images/blindspot-app-h4h-page1.png)
+
+![Page 1 of the app](/images/blindpspot-app-h4h-page2.png)
 
 ## Configuration
 
