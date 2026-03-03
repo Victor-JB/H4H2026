@@ -49,9 +49,7 @@ npx expo run:android   # or: npx expo run:ios
 4. Tap **Test Connection** to verify.
 5. Return to the Live view to see the camera feed and hear navigation alerts.
 
-<img src="/images/blindspot-app-h4h-page1.png" width="50%" />
-
-<img src="/images/blindspot-app-h4h-page1.png" width="50%" />
+<img src="/images/blindspot-app-h4h-page1.png" width="50%" /><img src="/images/blindspot-app-h4h-page1.png" width="50%" />
 
 ## Configuration
 
