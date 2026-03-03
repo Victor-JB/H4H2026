@@ -8,7 +8,7 @@ The premise is a very cheap, easily manufacturable yet advanced navigation asist
 - Passive object / dangerous objects detection and avoidance
 - Text reader geared towards street signs, other important pedestrian signs, with (future incoming) the capability to identify all sorts of text in an environment that would be helpful to see (user can tailor how much they want read, from pedetrian signs to restaurant signs)
 
-![Photo of the product](/images/IMG_5971.HEIC)
+![Photo of the product](/images/IMG_5971.png)
 
 ## Architecture
 
@@ -49,9 +49,9 @@ npx expo run:android   # or: npx expo run:ios
 4. Tap **Test Connection** to verify.
 5. Return to the Live view to see the camera feed and hear navigation alerts.
 
-![Page 1 of the app](/images/blindspot-app-h4h-page1.png)
+<img src="/images/blindspot-app-h4h-page1.png" width="50%" />
 
-![Page 1 of the app](/images/blindpspot-app-h4h-page2.png)
+<img src="/images/blindspot-app-h4h-page1.png" width="50%" />
 
 ## Configuration
 
