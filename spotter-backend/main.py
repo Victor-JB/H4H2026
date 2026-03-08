@@ -8,7 +8,6 @@ import time
 
 app = FastAPI()
 
-# Allow phone → backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,10 +15,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load YOLO once
-model = YOLO("yolov8n.pt")
-
-# Load EasyOCR once (downloads model on first run, then cached)
+# Upgraded to YOLOv8 Medium (yolov8m) for better accuracy.
+# Make sure to run `pip install ultralytics` to download the model on first run.
+model = YOLO("yolov8m.pt")
 ocr_reader = easyocr.Reader(["en"], gpu=False)
 
 
@@ -29,6 +27,25 @@ def bucket_lr(x_center: float, w: int) -> str:
     if x_center > w * 0.66:
         return "right"
     return "center"
+
+
+def sharpen_image(img):
+    """Applies a sharpening filter to enhance edges for better OCR."""
+    kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+    return cv2.filter2D(img, -1, kernel)
+
+
+def crop_and_pad(img, bbox, pad_pct=0.10):
+    """Crop a bounding box from the image with padding for OCR accuracy."""
+    h, w = img.shape[:2]
+    x1, y1, x2, y2 = [int(v) for v in bbox]
+    pw = int((x2 - x1) * pad_pct)
+    ph = int((y2 - y1) * pad_pct)
+    x1 = max(0, x1 - pw)
+    y1 = max(0, y1 - ph)
+    x2 = min(w, x2 + pw)
+    y2 = min(h, y2 + ph)
+    return img[y1:y2, x1:x2]
 
 
 @app.get("/health")
@@ -92,26 +109,8 @@ TEXT_LABELS = {
 }
 
 
-def crop_and_pad(img, bbox, pad_pct=0.10):
-    """Crop a bounding box from the image with padding for OCR accuracy."""
-    h, w = img.shape[:2]
-    x1, y1, x2, y2 = [int(v) for v in bbox]
-    pw = int((x2 - x1) * pad_pct)
-    ph = int((y2 - y1) * pad_pct)
-    x1 = max(0, x1 - pw)
-    y1 = max(0, y1 - ph)
-    x2 = min(w, x2 + pw)
-    y2 = min(h, y2 + ph)
-    return img[y1:y2, x1:x2]
-
-
 @app.post("/sign/upload")
 async def sign_upload(image: UploadFile = File(...), conf: float = 0.30):
-    """
-    YOLO detect → crop each box → EasyOCR → return paired results.
-    Reads text on every detected object, but highlights those likely
-    to carry text (signs, screens, books, etc.).
-    """
     t0 = time.time()
 
     content = await image.read()
@@ -136,14 +135,16 @@ async def sign_upload(image: UploadFile = File(...), conf: float = 0.30):
             label = model.names[int(cls)]
             xc = (x1 + x2) / 2
 
-            # Crop the detection and run OCR
             crop = crop_and_pad(img, [x1, y1, x2, y2])
             if crop.size == 0:
                 continue
 
-            ocr_results = ocr_reader.readtext(crop, detail=1, paragraph=False)
+            # PREPROCESSING ADDED HERE: Sharpen the cropped image
+            sharpened_crop = sharpen_image(crop)
 
-            # Gather text fragments with confidence
+            # Pass the sharpened crop to EasyOCR
+            ocr_results = ocr_reader.readtext(sharpened_crop, detail=1, paragraph=False)
+
             texts = []
             for bbox_pts, text, ocr_conf in ocr_results:
                 text = text.strip()
@@ -164,10 +165,8 @@ async def sign_upload(image: UploadFile = File(...), conf: float = 0.30):
                 }
             )
 
-    # Sort: items with text first, then by confidence
     readings.sort(key=lambda r: (not r["has_text"], -r["det_conf"]))
 
-    # Build a human-readable summary
     summary_parts = []
     for r in readings:
         if r["has_text"]:

@@ -33,11 +33,11 @@ void setupCamera() {
   config.fb_count     = 1;
 
   if (psramFound()) {
-    config.jpeg_quality = 1;
+    config.jpeg_quality = 10;
     config.fb_count     = 2;
     config.grab_mode    = CAMERA_GRAB_LATEST;
   } else {
-    config.frame_size  = FRAMESIZE_VGA;
+    config.frame_size  = FRAMESIZE_SXGA;
     config.fb_location = CAMERA_FB_IN_DRAM;
   }
 
@@ -53,8 +53,8 @@ void setupCamera() {
     s->set_brightness(s, 1);
     s->set_saturation(s, -2);
   }
-  s->set_framesize(s, FRAMESIZE_VGA);
-  s->set_quality(s, 15);
+  s->set_framesize(s, FRAMESIZE_SXGA);
+  s->set_quality(s, 10);
 
 #if defined(LED_GPIO_NUM)
   setupLedFlash(LED_GPIO_NUM);
