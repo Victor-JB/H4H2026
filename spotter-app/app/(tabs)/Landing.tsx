@@ -117,8 +117,8 @@ export default function LandingScreen() {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statCard}>
-            <Text style={[styles.statValue, styles.statValueGold]}>~$50</Text>
-            <Text style={styles.statLabel}>vs. $4,250+</Text>
+            <Text style={[styles.statValue, styles.statValueGold]}>~$25</Text>
+            <Text style={styles.statLabel}>vs. $380+</Text>
           </View>
         </View>
 

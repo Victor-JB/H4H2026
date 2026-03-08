@@ -35,6 +35,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="Landing"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="listen"
         options={{
           title: 'Listen',
@@ -42,15 +49,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Landing"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="Vision"
         options={{
-          href: null,
+          title: 'Vision',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="eye.fill" color={color} />,
         }}
       />
       <Tabs.Screen
