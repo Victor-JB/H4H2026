@@ -45,6 +45,10 @@ int           lastButtonState  = HIGH;
 unsigned long lastDebounceTime = 0;
 unsigned long debounceDelay    = 50;
 
+// WiFi Reconnect Timer Globals
+unsigned long lastWiFiCheckTime = 0;
+const unsigned long wifiCheckInterval = 10000; // Check every 10 seconds (10,000 ms)
+
 // ==========================================
 // SETUP
 // ==========================================
@@ -58,6 +62,10 @@ void setup() {
   // WiFi
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false); // Crucial for camera stream stability
+  
+  // Enable built-in auto-reconnect as a baseline
+  WiFi.setAutoReconnect(true); 
+  
   WiFi.begin(ssid, password);
   Serial.printf("WiFi connecting to SSID: '%s'\n", ssid);
 
@@ -101,8 +109,19 @@ void setup() {
 // MAIN LOOP
 // ==========================================
 void loop() {
+  // --- WIFI RECONNECT LOGIC ---
+  // Check WiFi status every 10 seconds. If disconnected, attempt to reconnect.
+  if (WiFi.status() != WL_CONNECTED && (millis() - lastWiFiCheckTime >= wifiCheckInterval)) {
+    Serial.println("WiFi connection lost. Attempting to reconnect...");
+    WiFi.disconnect();
+    WiFi.reconnect();
+    lastWiFiCheckTime = millis();
+  }
+
+  // Handle incoming web requests
   audioServer.handleClient();
 
+  // --- BUTTON LOGIC ---
   int reading = digitalRead(BUTTON_PIN);
   if (reading != lastButtonState) {
     lastDebounceTime = millis();
