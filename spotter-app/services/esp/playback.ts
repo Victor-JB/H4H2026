@@ -1,4 +1,4 @@
-import { Audio } from 'expo-audio'; // or 'expo-av'
+import { Audio } from 'expo-av'; // or 'expo-av'
 import { Buffer } from 'buffer';
 
 /**
@@ -32,14 +32,18 @@ export async function sendAudioToEsp32(
   });
 
   const base64String = Buffer.from(wavBinary).toString('base64');
+  console.log(`[ESP Playback] Sending ${wavBinary.byteLength} bytes to ESP32. Base64 length: ${base64String.length}`);
   
   // 2. Create the Data URI (ensure the mime type matches your data, e.g., audio/wav or audio/mpeg)
   const sourceUri = `data:audio/wav;base64,${base64String}`;
 
   // 3. Load and play
-  const player = await Audio.createPlayer(sourceUri);
-  player.play();
-    
+  try {
+    const { sound } = await Audio.Sound.createAsync({ uri: sourceUri });
+    await sound.playAsync();
+  } catch (error) {
+    console.error("[ESP Playback] Failed to play locally on phone:", error);
+  }
 
   if (!res.ok) {
     const errBody = await res.text().catch(() => "");
