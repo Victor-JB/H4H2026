@@ -57,14 +57,13 @@ void setup() {
 
   // WiFi
   WiFi.mode(WIFI_STA);
-  WiFi.setTxPower(WIFI_POWER_8_5dBm);
   WiFi.setSleep(false); // Crucial for camera stream stability
   WiFi.begin(ssid, password);
   Serial.print("WiFi connecting");
 
   int retries = 0;
-  while (WiFi.status() != WL_CONNECTED && retries < 30) {
-    delay(100);
+  while (WiFi.status() != WL_CONNECTED && retries < 60) {
+    delay(500);
     Serial.print(".");
     retries++;
   }
