@@ -240,3 +240,5 @@ secrets.h
 
 .expo
 prompt.txt
+
+*.pt
