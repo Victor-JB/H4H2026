@@ -24,16 +24,16 @@ void setupCamera() {
   config.pin_reset    = RESET_GPIO_NUM;
 
   // Stabilized values for streaming over mobile hotspot
-  config.xclk_freq_hz = 10000000;
-  config.frame_size   = FRAMESIZE_VGA;
+  config.xclk_freq_hz = 15000000;
+  config.frame_size   = FRAMESIZE_SXGA;
   config.pixel_format = PIXFORMAT_JPEG;
   config.grab_mode    = CAMERA_GRAB_WHEN_EMPTY;
   config.fb_location  = CAMERA_FB_IN_PSRAM;
-  config.jpeg_quality = 15;
+  config.jpeg_quality = 10;
   config.fb_count     = 1;
 
   if (psramFound()) {
-    config.jpeg_quality = 15;
+    config.jpeg_quality = 1;
     config.fb_count     = 2;
     config.grab_mode    = CAMERA_GRAB_LATEST;
   } else {

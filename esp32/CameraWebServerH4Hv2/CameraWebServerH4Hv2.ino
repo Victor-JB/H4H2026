@@ -57,8 +57,6 @@ void setup() {
 
   // WiFi
   WiFi.mode(WIFI_STA);
-  WiFi.disconnect(true); // clear any stored credentials from NVS
-  delay(100);
   WiFi.setSleep(false); // Crucial for camera stream stability
   WiFi.begin(ssid, password);
   Serial.printf("WiFi connecting to SSID: '%s'\n", ssid);
