@@ -10,6 +10,7 @@ import {
 import { fetchEspAudioBlob } from "../../services/esp/audio";
 import { handleVoiceCommand, VoiceCommandResult } from "../../engine/handleVoiceCommand";
 import { ESP_AUDIO_BASE, ESP_STATUS_URL } from "../../services/esp/config";
+import { setLastCommand } from "@/stores/snapshot";
 
 // ── Types ───────────────────────────────────────────────────
 type Phase =
@@ -81,6 +82,13 @@ export default function ListenScreen() {
       if (!isMounted.current) return;
 
       pushLog(result);
+      setLastCommand({
+        transcript: result.transcript,
+        intent: result.intent,
+        response: result.response,
+        espPlaybackOk: result.espPlaybackOk,
+        time: new Date().toLocaleTimeString(),
+      });
       setPhase("done");
     } catch (e: any) {
       if (!isMounted.current) return;
