@@ -57,19 +57,22 @@ void setup() {
 
   // WiFi
   WiFi.mode(WIFI_STA);
+  WiFi.disconnect(true); // clear any stored credentials from NVS
+  delay(100);
   WiFi.setSleep(false); // Crucial for camera stream stability
   WiFi.begin(ssid, password);
-  Serial.print("WiFi connecting");
+  Serial.printf("WiFi connecting to SSID: '%s'\n", ssid);
 
   int retries = 0;
   while (WiFi.status() != WL_CONNECTED && retries < 60) {
     delay(500);
-    Serial.print(".");
+    Serial.printf("  [%d/60] status=%d\n", retries + 1, WiFi.status());
     retries++;
   }
 
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("\nFailed to connect to Hotspot. Restarting...");
+    Serial.printf("\nFailed. Final status=%d (1=no SSID, 4=wrong password, 6=disconnected)\n", WiFi.status());
+    Serial.println("Restarting...");
     ESP.restart();
   }
   Serial.println("\nWiFi Connected!");
