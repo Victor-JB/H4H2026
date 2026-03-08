@@ -64,6 +64,9 @@ async def scene_upload(image: UploadFile = File(...), conf: float = 0.35):
     if img is None:
         return {"error": "Invalid image"}
 
+    # PREPROCESSING ADDED HERE: Sharpen the full image before YOLO inference
+    img = sharpen_image(img)
+
     h, w = img.shape[:2]
     results = model.predict(img, conf=conf, verbose=False)[0]
 
