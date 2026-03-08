@@ -12,6 +12,14 @@ void sendWavHeader(WiFiClient& client, uint32_t dataSize);
 void startCameraServer();
 void setupLedFlash(int pin);
 
+// extern declarations for variables defined in sub-sketch files
+// (Arduino concatenates .ino files after the main, so these are
+// declared here to make them visible to setup() and loop())
+extern volatile bool isRecording;
+extern volatile bool isPlaying;
+extern bool          isAudioReady;
+extern size_t        audioDataSize;
+
 // ==========================================
 // CONFIGURATION & HARDWARE PINS
 // ==========================================
