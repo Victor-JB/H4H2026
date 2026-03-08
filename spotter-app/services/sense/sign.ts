@@ -1,4 +1,5 @@
 import * as FileSystem from "expo-file-system/legacy";
+import { setSnapshot } from "@/stores/snapshot";
 
 export type SignReading = {
   label: string;
@@ -34,6 +35,7 @@ export async function runSignOnce(params: {
   const localPath = `${FileSystem.cacheDirectory}sign_frame_${Date.now()}.jpg`;
 
   const dl = await FileSystem.downloadAsync(captureUrl, localPath);
+  setSnapshot(dl.uri);
 
   // 2) Upload to backend sign endpoint
   const form = new FormData();
